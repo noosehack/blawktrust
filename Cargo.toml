@@ -1,0 +1,23 @@
+[package]
+name = "blawktrust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "fusion_demo"
+harness = false
+
+[[bench]]
+name = "kernels"
+harness = false
+
+[profile.release]
+debug = true
+opt-level = 3
+codegen-units = 1
+lto = "fat"
