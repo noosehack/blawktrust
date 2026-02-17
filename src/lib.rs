@@ -9,4 +9,4 @@ pub mod exec;
 pub mod builtins;
 
 pub use table::{Table, Column, NULL_TS};
-pub use builtins::{dlog_column, ln_column, abs_column};
+pub use builtins::{dlog_column, ln_column, abs_column, sum, sum0, mean, mean0};

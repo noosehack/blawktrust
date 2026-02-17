@@ -11,5 +11,5 @@ pub mod scratch;
 
 pub use math::*;
 // pub use nulls::*;  // Removed: bitmap-based null handling obsolete
-pub use ops::{dlog_column, ln_column, abs_column};
+pub use ops::{dlog_column, ln_column, abs_column, sum, sum0, mean, mean0};
 pub use scratch::Scratch;
