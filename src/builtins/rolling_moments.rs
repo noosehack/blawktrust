@@ -3,6 +3,10 @@
 //! Computes mean, std, skew, kurtosis in one rolling pass over the data.
 //! Uses past-only window [i-window, i-1] for Ft-measurable (investable) signals.
 
+#![allow(clippy::needless_range_loop)]
+#![allow(clippy::collapsible_if)]
+#![allow(clippy::manual_unwrap_or_default)]
+
 use crate::table::bitmap::Bitmap;
 
 /// Bitmask for selecting which moments to compute
@@ -152,18 +156,18 @@ pub fn rolling_moments_past_only_f64(
     let mut output = RollingMomentsOutput::new(n, mask);
 
     // Fast path: all valid, no bitmap checks needed
-    if validity.is_none() {
-        rolling_moments_all_valid(x, window, min_periods, mask, max_moment, &mut output);
-    } else {
+    if let Some(v) = validity {
         rolling_moments_with_validity(
             x,
             window,
             min_periods,
             mask,
             max_moment,
-            validity.unwrap(),
+            v,
             &mut output,
         );
+    } else {
+        rolling_moments_all_valid(x, window, min_periods, mask, max_moment, &mut output);
     }
 
     output

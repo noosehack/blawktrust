@@ -15,7 +15,7 @@ pub struct Bitmap {
 impl Bitmap {
     /// Create bitmap with all bits set to 1 (all valid)
     pub fn new_all_valid(len: usize) -> Self {
-        let words = (len + 63) / 64;
+        let words = len.div_ceil(64);
         let mut bits = vec![!0u64; words];
 
         // Mask off unused bits in last word
@@ -29,7 +29,7 @@ impl Bitmap {
 
     /// Create bitmap with all bits set to 0 (all null)
     pub fn new_all_null(len: usize) -> Self {
-        let words = (len + 63) / 64;
+        let words = len.div_ceil(64);
         Self {
             bits: vec![0u64; words],
             len,

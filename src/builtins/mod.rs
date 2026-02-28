@@ -11,7 +11,7 @@ pub mod ori_ops;
 pub mod rolling_moments;
 pub mod scratch;
 
-pub use math::*;
+// Re-exports from math are unused at module level
 // pub use nulls::*;  // Removed: bitmap-based null handling obsolete
 pub use ops::{abs_column, dlog_column, ln_column, mean, mean0, sum, sum0};
 pub use rolling_moments::{rolling_moments_past_only_f64, MomentsMask};

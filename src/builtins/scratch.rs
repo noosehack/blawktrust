@@ -4,7 +4,7 @@
 //! After warmup, pipelines allocate ~0.
 
 use crate::table::Bitmap;
-use std::mem::MaybeUninit;
+// Removed unused import: std::mem::MaybeUninit
 
 /// Reusable buffer pool for pipeline operations
 ///

@@ -3,7 +3,7 @@
 //! The 8 D4 orientations form a group under composition.
 //! This module provides the composition table for efficient O(1) relative orientation changes.
 
-use super::orientation::{Ori, ORI_SPECS};
+use super::orientation::Ori;
 
 /// Encode a D4 orientation to 0..7
 ///

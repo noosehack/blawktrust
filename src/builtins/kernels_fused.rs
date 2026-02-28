@@ -30,8 +30,8 @@ pub fn dlog_scale_add_no_nulls(out: &mut [f64], x: &[f64], lag: usize, a: f64, b
     }
 
     // Prefix is invalid (no prior data)
-    for i in 0..lag {
-        out[i] = f64::NAN;
+    for out_val in &mut out[..lag] {
+        *out_val = f64::NAN;
     }
 
     unsafe {
@@ -172,6 +172,7 @@ pub fn sub_mul_add_no_nulls(out: &mut [f64], x: &[f64], y: &[f64], a: f64, b: f6
 }
 
 /// sub_mul_add masked path
+#[allow(clippy::too_many_arguments)]
 pub fn sub_mul_add_masked(
     out: &mut [f64],
     out_valid: &mut Bitmap,

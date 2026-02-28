@@ -1,4 +1,6 @@
 //! Orientation-aware operations
+
+#![allow(clippy::needless_range_loop)]
 //!
 //! Operations that dispatch based on TableView orientation.
 //! Demonstrates the O(1) orientation system in action.

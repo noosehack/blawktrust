@@ -4,7 +4,7 @@
 //! Physical storage remains columnar, orientation just changes interpretation.
 
 use super::orientation::{Ori, OriClass, ReduceMode, VecAxis, ORI_H};
-use super::table::Table;
+use super::Table;
 use std::sync::Arc;
 
 /// A view of a Table with an orientation

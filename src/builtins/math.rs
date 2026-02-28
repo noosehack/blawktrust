@@ -54,10 +54,7 @@ impl Column {
 #[inline(always)]
 fn log_kernel_old(x: &[f64]) -> Vec<f64> {
     let n = x.len();
-    let mut out = Vec::<f64>::with_capacity(n);
-    unsafe {
-        out.set_len(n);
-    }
+    let mut out = vec![0.0; n];
 
     for i in 0..n {
         unsafe {
@@ -72,10 +69,7 @@ fn log_kernel_old(x: &[f64]) -> Vec<f64> {
 #[inline(always)]
 fn shift_kernel_old(x: &[f64], lag: usize) -> Vec<f64> {
     let n = x.len();
-    let mut out = Vec::<f64>::with_capacity(n);
-    unsafe {
-        out.set_len(n);
-    }
+    let mut out = vec![0.0; n];
 
     // First lag elements are NA
     for i in 0..lag.min(n) {
@@ -99,10 +93,7 @@ fn sub_kernel_old(a: &[f64], b: &[f64]) -> Vec<f64> {
     let n = a.len();
     debug_assert_eq!(n, b.len());
 
-    let mut out = Vec::<f64>::with_capacity(n);
-    unsafe {
-        out.set_len(n);
-    }
+    let mut out = vec![0.0; n];
 
     for i in 0..n {
         unsafe {
@@ -121,10 +112,7 @@ fn sub_kernel_old(a: &[f64], b: &[f64]) -> Vec<f64> {
 #[inline(always)]
 fn dlog_fused_kernel_old(x: &[f64], lag: usize) -> Vec<f64> {
     let n = x.len();
-    let mut out = Vec::<f64>::with_capacity(n);
-    unsafe {
-        out.set_len(n);
-    }
+    let mut out = vec![0.0; n];
 
     // First lag elements are NA (no prior value)
     for i in 0..lag.min(n) {

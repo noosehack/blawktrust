@@ -27,8 +27,8 @@ pub fn dlog_v1_no_init(data: &[f64], lag: usize) -> Vec<f64> {
         out.set_len(n);
     }
 
-    for i in 0..lag.min(n) {
-        out[i].write(NA);
+    for out_val in &mut out[..lag.min(n)] {
+        out_val.write(NA);
     }
 
     for i in lag..n {
@@ -73,8 +73,8 @@ pub fn dlog_v3_no_nulls(data: &[f64], lag: usize) -> Vec<f64> {
         return out;
     }
 
-    for i in 0..lag {
-        out[i] = f64::NAN;
+    for out_val in &mut out[..lag] {
+        *out_val = f64::NAN;
     }
 
     unsafe {

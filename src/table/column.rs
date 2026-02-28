@@ -223,9 +223,9 @@ impl Column {
     pub fn has_nulls(&self) -> bool {
         match self {
             Column::F64(data) => data.iter().any(|x| x.is_nan()),
-            Column::Date(data) => data.iter().any(|x| *x == NULL_DATE),
-            Column::Timestamp(data) => data.iter().any(|x| *x == NULL_TIMESTAMP),
-            Column::Ts(data) => data.iter().any(|x| *x == NULL_TS),
+            Column::Date(data) => data.contains(&NULL_DATE),
+            Column::Timestamp(data) => data.contains(&NULL_TIMESTAMP),
+            Column::Ts(data) => data.contains(&NULL_TS),
         }
     }
 }
