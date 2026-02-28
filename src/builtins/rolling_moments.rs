@@ -157,15 +157,7 @@ pub fn rolling_moments_past_only_f64(
 
     // Fast path: all valid, no bitmap checks needed
     if let Some(v) = validity {
-        rolling_moments_with_validity(
-            x,
-            window,
-            min_periods,
-            mask,
-            max_moment,
-            v,
-            &mut output,
-        );
+        rolling_moments_with_validity(x, window, min_periods, mask, max_moment, v, &mut output);
     } else {
         rolling_moments_all_valid(x, window, min_periods, mask, max_moment, &mut output);
     }
@@ -234,7 +226,9 @@ fn rolling_moments_all_valid(
             }
 
             // Variance and standard deviation
-            if mask.has(MomentsMask::STD) || mask.has(MomentsMask::SKEW) || mask.has(MomentsMask::KURT)
+            if mask.has(MomentsMask::STD)
+                || mask.has(MomentsMask::SKEW)
+                || mask.has(MomentsMask::KURT)
             {
                 if count >= 2 {
                     // Sample variance (ddof=1)
@@ -333,7 +327,9 @@ fn rolling_moments_with_validity(
                 count_vec[i] = nc;
             }
 
-            if mask.has(MomentsMask::STD) || mask.has(MomentsMask::SKEW) || mask.has(MomentsMask::KURT)
+            if mask.has(MomentsMask::STD)
+                || mask.has(MomentsMask::SKEW)
+                || mask.has(MomentsMask::KURT)
             {
                 if count >= 2 {
                     let var = (s2 - s1 * s1 / nc) / (nc - 1.0);
@@ -468,7 +464,11 @@ mod tests {
         let kurts = output.kurt.unwrap();
 
         // Position 5: window [1,1,1,10,1] has high kurtosis (excess > 0)
-        assert!(kurts[5] > 0.0, "Expected positive excess kurtosis, got {}", kurts[5]);
+        assert!(
+            kurts[5] > 0.0,
+            "Expected positive excess kurtosis, got {}",
+            kurts[5]
+        );
     }
 
     #[test]
