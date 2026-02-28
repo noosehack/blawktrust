@@ -161,6 +161,36 @@ impl Ori {
             Ori::Each => ReduceMode::ByCols, // Default to colwise
         }
     }
+
+    /// Get canonical name for this orientation
+    ///
+    /// Returns the standard short name (H, Z, N, _N, etc.)
+    /// For synonyms (e.g., S and Z have same D4 values), returns the canonical one.
+    ///
+    /// # Example
+    /// ```
+    /// use blawktrust::{ORI_H, ORI_Z, ORI_S, ORI_X, ORI_R};
+    ///
+    /// assert_eq!(ORI_H.canonical_name(), "H");
+    /// assert_eq!(ORI_Z.canonical_name(), "Z");
+    /// assert_eq!(ORI_S.canonical_name(), "Z");  // S is synonym for Z
+    /// assert_eq!(ORI_X.canonical_name(), "X");
+    /// assert_eq!(ORI_R.canonical_name(), "R");
+    /// ```
+    pub fn canonical_name(self) -> &'static str {
+        match self {
+            Ori::Each => "X",
+            Ori::Real => "R",
+            Ori::D4 { swap: false, flip_i: false, flip_j: false } => "H",
+            Ori::D4 { swap: false, flip_i: true, flip_j: false } => "N",
+            Ori::D4 { swap: false, flip_i: false, flip_j: true } => "_N",
+            Ori::D4 { swap: false, flip_i: true, flip_j: true } => "_H",
+            Ori::D4 { swap: true, flip_i: false, flip_j: false } => "Z",  // Canonical for S
+            Ori::D4 { swap: true, flip_i: true, flip_j: false } => "_Z",
+            Ori::D4 { swap: true, flip_i: false, flip_j: true } => "_S",
+            Ori::D4 { swap: true, flip_i: true, flip_j: true } => "??",  // Unused 8th D4 orientation
+        }
+    }
 }
 
 /// Orientation specification with name and metadata
@@ -484,5 +514,24 @@ mod tests {
                 assert_eq!(phys_c, i);
             }
         }
+    }
+
+    #[test]
+    fn test_canonical_names() {
+        // Column-major orientations
+        assert_eq!(ORI_H.canonical_name(), "H");
+        assert_eq!(ORI_N.canonical_name(), "N");
+        assert_eq!(ORI__N.canonical_name(), "_N");
+        assert_eq!(ORI__H.canonical_name(), "_H");
+
+        // Row-major orientations
+        assert_eq!(ORI_Z.canonical_name(), "Z");
+        assert_eq!(ORI_S.canonical_name(), "Z");  // S is synonym for Z
+        assert_eq!(ORI__Z.canonical_name(), "_Z");
+        assert_eq!(ORI__S.canonical_name(), "_S");
+
+        // Special modes
+        assert_eq!(ORI_X.canonical_name(), "X");
+        assert_eq!(ORI_R.canonical_name(), "R");
     }
 }

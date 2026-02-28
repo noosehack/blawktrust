@@ -12,7 +12,7 @@ use crate::builtins::{dlog_column, wmean0};
 /// - ColwiseLike (H, N, _N, _H): Sum down each column → output has ncols values
 /// - RowwiseLike (Z, S, _Z, _S): Sum across each row → output has nrows values
 /// - Real (R): Sum all values → output is single scalar
-/// - Each (X): Elementwise identity (sum of scalar = scalar) → flattened table values
+/// - Each (X): Not defined (broadcast mode, no vector structure for aggregation)
 ///
 /// # Example:
 /// ```
@@ -42,7 +42,7 @@ pub fn sum(view: &TableView) -> Column {
         OriClass::ColwiseLike => sum_colwise(&view.table),
         OriClass::RowwiseLike => sum_rowwise_tiled(&view.table),
         OriClass::Real => sum_scalar(&view.table),
-        OriClass::Each => sum_elementwise(&view.table),
+        OriClass::Each => panic!("sum not defined for Each (X) orientation - use for broadcast context only"),
     }
 }
 
@@ -159,31 +159,6 @@ fn sum_scalar(table: &Table) -> Column {
 
     let result = if has_valid { total } else { f64::NAN };
     Column::F64(vec![result])
-}
-
-/// Sum elementwise (Each mode)
-///
-/// For Each/X mode, each element is independent.
-/// Sum of a scalar is identity: sum(x) = x
-/// Returns all table values flattened into a single column.
-fn sum_elementwise(table: &Table) -> Column {
-    let mut result = Vec::new();
-
-    for col in &table.columns {
-        match col {
-            Column::F64(data) => {
-                // Each element independently: sum(x) = x (identity)
-                result.extend_from_slice(data);
-            }
-            Column::Date(_) | Column::Timestamp(_) => {
-                // Non-numeric columns: skip or convert to NaN
-                let nrows = table.row_count();
-                result.extend(std::iter::repeat(f64::NAN).take(nrows));
-            }
-        }
-    }
-
-    Column::F64(result)
 }
 
 /// Daily log returns (dlog) with orientation-aware dispatch
@@ -544,22 +519,11 @@ mod tests {
     }
 
     #[test]
-    fn test_sum_each_returns_identity() {
-        // For Each/X mode, sum is identity: sum(x) = x
-        // Returns all values flattened
+    #[should_panic(expected = "sum not defined for Each")]
+    fn test_sum_each_panics() {
         let table = make_test_table();
         let view = TableView::with_ori(table, ORI_X);
-        let result = sum(&view);
-
-        match result {
-            Column::F64(data) => {
-                // Should have all 6 values: [1,2,3] from col_a, [4,5,6] from col_b
-                assert_eq!(data.len(), 6);
-                assert_eq!(&data[..3], &[1.0, 2.0, 3.0]);
-                assert_eq!(&data[3..], &[4.0, 5.0, 6.0]);
-            }
-            _ => panic!("Expected F64 column"),
-        }
+        sum(&view); // Should panic
     }
 
     #[test]
