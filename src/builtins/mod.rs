@@ -7,6 +7,7 @@ pub mod kernels_fused;
 pub mod kernels_wordwise;
 // pub mod nulls;  // Obsolete: kdb-style uses embedded sentinels, not bitmap conversion
 pub mod ops;
+pub mod ori_ops;
 pub mod scratch;
 
 pub use math::*;

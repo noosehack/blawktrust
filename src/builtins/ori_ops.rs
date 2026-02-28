@@ -4,7 +4,13 @@
 //! Demonstrates the O(1) orientation system in action.
 
 use crate::table::{Column, Table, TableView, OriClass};
-use crate::builtins::{dlog_column, wmean0};
+use crate::builtins::dlog_column;
+
+// Temporary stub for wmean0 (windowed mean)
+// TODO: Implement proper windowed mean function
+fn wmean0(_col: &Column, _window: usize) -> Column {
+    panic!("wmean0 not yet implemented - rolling window mean needs proper implementation")
+}
 
 /// Sum operation with orientation-aware dispatch
 ///
@@ -68,7 +74,7 @@ fn sum_colwise(table: &Table) -> Column {
                 }
                 result.push(if has_valid { sum } else { f64::NAN });
             }
-            Column::Date(_) | Column::Timestamp(_) => {
+            Column::Date(_) | Column::Timestamp(_) | Column::Ts(_) => {
                 // Non-numeric columns: output NA
                 result.push(f64::NAN);
             }
@@ -151,7 +157,7 @@ fn sum_scalar(table: &Table) -> Column {
                     }
                 }
             }
-            Column::Date(_) | Column::Timestamp(_) => {
+            Column::Date(_) | Column::Timestamp(_) | Column::Ts(_) => {
                 // Skip non-numeric columns
             }
         }
@@ -212,7 +218,7 @@ fn dlog_colwise(table: &Table) -> Table {
     for col in &table.columns {
         let new_col = match col {
             Column::F64(_) => dlog_column(col, 1), // lag=1 for daily returns
-            Column::Date(_) | Column::Timestamp(_) => col.clone(),
+            Column::Date(_) | Column::Timestamp(_) | Column::Ts(_) => col.clone(),
         };
         new_columns.push(new_col);
     }
@@ -347,7 +353,7 @@ fn w5_colwise(table: &Table, window: usize) -> Table {
     for col in &table.columns {
         let new_col = match col {
             Column::F64(_) => wmean0(col, window),
-            Column::Date(_) | Column::Timestamp(_) => col.clone(),
+            Column::Date(_) | Column::Timestamp(_) | Column::Ts(_) => col.clone(),
         };
         new_columns.push(new_col);
     }

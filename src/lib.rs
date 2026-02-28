@@ -7,7 +7,7 @@ pub mod io;
 pub mod expr;
 pub mod exec;
 pub mod builtins;
-pub mod pipeline;
+// pub mod pipeline;  // WIP: untracked
 
 pub use table::{
     Table, Column, NULL_DATE, NULL_TIMESTAMP, NULL_TS,

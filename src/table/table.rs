@@ -3,6 +3,7 @@
 use super::Column;
 
 /// A table is a collection of named, typed columns
+#[derive(Debug, Clone)]
 pub struct Table {
     pub names: Vec<String>,
     pub columns: Vec<Column>,
