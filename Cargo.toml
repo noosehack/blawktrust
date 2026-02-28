@@ -8,14 +8,6 @@ edition = "2021"
 [dev-dependencies]
 criterion = "0.5"
 
-[[bench]]
-name = "fusion_demo"
-harness = false
-
-[[bench]]
-name = "kernels"
-harness = false
-
 [profile.release]
 debug = true
 opt-level = 3

@@ -10,7 +10,7 @@ use crate::table::Bitmap;
 ///
 /// Usage pattern:
 /// ```no_run
-/// use blawktrust::Scratch;
+/// use blawktrust::builtins::Scratch;
 ///
 /// let mut scratch = Scratch::new();
 ///

@@ -13,10 +13,7 @@ use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criteri
 #[inline(always)]
 fn log_kernel_tight(x: &[f64]) -> Vec<f64> {
     let n = x.len();
-    let mut out = Vec::<f64>::with_capacity(n);
-    unsafe {
-        out.set_len(n);
-    }
+    let mut out = vec![0.0; n];
 
     for i in 0..n {
         unsafe {
@@ -29,10 +26,7 @@ fn log_kernel_tight(x: &[f64]) -> Vec<f64> {
 #[inline(always)]
 fn shift_kernel_tight(x: &[f64], lag: usize) -> Vec<f64> {
     let n = x.len();
-    let mut out = Vec::<f64>::with_capacity(n);
-    unsafe {
-        out.set_len(n);
-    }
+    let mut out = vec![0.0; n];
 
     // First lag elements are NaN
     for i in 0..lag.min(n) {
@@ -55,10 +49,7 @@ fn sub_kernel_tight(a: &[f64], b: &[f64]) -> Vec<f64> {
     let n = a.len();
     debug_assert_eq!(n, b.len());
 
-    let mut out = Vec::<f64>::with_capacity(n);
-    unsafe {
-        out.set_len(n);
-    }
+    let mut out = vec![0.0; n];
 
     for i in 0..n {
         unsafe {
@@ -71,10 +62,7 @@ fn sub_kernel_tight(a: &[f64], b: &[f64]) -> Vec<f64> {
 #[inline(always)]
 fn dlog_fused_kernel_tight(x: &[f64], lag: usize) -> Vec<f64> {
     let n = x.len();
-    let mut out = Vec::<f64>::with_capacity(n);
-    unsafe {
-        out.set_len(n);
-    }
+    let mut out = vec![0.0; n];
 
     // First lag elements are NaN (no prior value)
     for i in 0..lag.min(n) {
@@ -124,7 +112,7 @@ fn bench_shift(c: &mut Criterion) {
     let mut group = c.benchmark_group("shift_kernel");
 
     for size in [1_000, 10_000, 100_000, 1_000_000].iter() {
-        let data: Vec<f64> = (0..*size).map(|i| (i as f64)).collect();
+        let data: Vec<f64> = (0..*size).map(|i| i as f64).collect();
 
         group.throughput(Throughput::Elements(*size as u64));
         group.bench_with_input(BenchmarkId::from_parameter(size), size, |b, _| {
@@ -142,8 +130,8 @@ fn bench_sub(c: &mut Criterion) {
     let mut group = c.benchmark_group("sub_kernel");
 
     for size in [1_000, 10_000, 100_000, 1_000_000].iter() {
-        let a: Vec<f64> = (0..*size).map(|i| (i as f64) + 100.0).collect();
-        let b: Vec<f64> = (0..*size).map(|i| (i as f64)).collect();
+        let a: Vec<f64> = (0..*size).map(|i| i as f64 + 100.0).collect();
+        let b: Vec<f64> = (0..*size).map(|i| i as f64).collect();
 
         group.throughput(Throughput::Elements(*size as u64));
         group.bench_with_input(BenchmarkId::from_parameter(size), size, |b_bench, _| {

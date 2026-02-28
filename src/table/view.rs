@@ -158,13 +158,7 @@ mod tests {
         ];
 
         let columns = (0..4)
-            .map(|j| {
-                Column::F64(vec![
-                    (10 * 0 + j) as f64,
-                    (10 * 1 + j) as f64,
-                    (10 * 2 + j) as f64,
-                ])
-            })
+            .map(|j| Column::F64(vec![j as f64, (10 + j) as f64, (20 + j) as f64]))
             .collect();
 
         Table::new(names, columns)

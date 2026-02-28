@@ -142,10 +142,10 @@ mod tests {
 
         // Print the generated table for inspection
         println!("Generated D4_COMP table:");
-        for a in 0..8 {
+        for row in &generated {
             print!("    [");
-            for b in 0..8 {
-                print!("{}", generated[a][b]);
+            for (b, &val) in row.iter().enumerate() {
+                print!("{}", val);
                 if b < 7 {
                     print!(", ");
                 }
@@ -153,12 +153,12 @@ mod tests {
             println!("],");
         }
 
-        for a in 0..8 {
-            for b in 0..8 {
+        for (a, row) in generated.iter().enumerate() {
+            for (b, &val) in row.iter().enumerate() {
                 assert_eq!(
-                    D4_COMP[a][b], generated[a][b],
+                    D4_COMP[a][b], val,
                     "D4_COMP[{}][{}] mismatch: expected {}, got {}",
-                    a, b, generated[a][b], D4_COMP[a][b]
+                    a, b, val, D4_COMP[a][b]
                 );
             }
         }
@@ -229,15 +229,17 @@ mod tests {
 
     #[test]
     fn test_all_d4_specs_encodable() {
-        // Verify all D4 orientations in ORI_SPECS are encodable
-        for spec in &ORI_SPECS {
-            if let Ori::D4 { .. } = spec.ori {
-                let id = d4_to_id(spec.ori);
-                assert!(
-                    id.is_some(),
-                    "Failed to encode D4 orientation {}",
-                    spec.name
-                );
+        // Verify all D4 orientations are encodable
+        use crate::table::{
+            ORI_H, ORI_N, ORI_R, ORI_S, ORI_X, ORI_Z, ORI__H, ORI__N, ORI__S, ORI__Z,
+        };
+        let all_oris = [
+            ORI_H, ORI_N, ORI__N, ORI__H, ORI_Z, ORI_S, ORI__Z, ORI__S, ORI_X, ORI_R,
+        ];
+        for &ori in &all_oris {
+            if let Ori::D4 { .. } = ori {
+                let id = d4_to_id(ori);
+                assert!(id.is_some(), "Failed to encode D4 orientation");
             }
         }
     }

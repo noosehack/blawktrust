@@ -278,7 +278,7 @@ mod tests {
         let x = vec![10.0, 20.0, 30.0];
         let y = vec![1.0, 2.0, 3.0];
 
-        let mut x_valid = Bitmap::new_all_valid(3);
+        let x_valid = Bitmap::new_all_valid(3);
         let mut y_valid = Bitmap::new_all_valid(3);
         y_valid.set(1, false); // y[1] is null
 
