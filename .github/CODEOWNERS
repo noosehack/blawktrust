@@ -1,0 +1,75 @@
+# CODEOWNERS - Code review requirements for blawktrust
+#
+# This file defines who must approve changes to critical files.
+# Protects safeguards from accidental or malicious deletion.
+#
+# Syntax: <path-pattern> @github-username @org/team-name
+#
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# =============================================================================
+# CRITICAL SAFEGUARDS - DO NOT MODIFY WITHOUT APPROVAL
+# =============================================================================
+#
+# These files are part of the API stability contract and prevent the
+# 2026-02-28 incident (API removal causing 48 downstream errors) from
+# recurring. Changes require core team approval.
+
+# CI/CD Infrastructure
+/.github/workflows/                @noosehack/core-maintainers
+/.github/CODEOWNERS                @noosehack/core-maintainers
+
+# API Contract Self-Test
+# If this is removed, local tests won't catch API removals
+/src/lib.rs                        @noosehack/core-maintainers
+
+# Release Gating Scripts
+# These enforce pre-release validation
+/scripts/release_check.sh          @noosehack/core-maintainers
+/scripts/release_check.ps1         @noosehack/core-maintainers
+
+# Release Process Documentation
+/RELEASE.md                        @noosehack/core-maintainers
+
+# =============================================================================
+# PUBLIC API SURFACE - REQUIRES CAREFUL REVIEW
+# =============================================================================
+#
+# Changes to these files affect downstream consumers (BLISP).
+# API removals or breaking changes require:
+# 1. Semver version bump
+# 2. Deprecation period (for non-emergency changes)
+# 3. Coordination with BLISP maintainers
+
+# Core table types (Column, Table, TableView)
+/src/table/                        @noosehack/core-maintainers
+
+# Public builtins (operations exposed to BLISP)
+/src/builtins/ori_ops.rs           @noosehack/core-maintainers
+/src/builtins/ops.rs               @noosehack/core-maintainers
+/src/builtins/mod.rs               @noosehack/core-maintainers
+
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+# Cargo.toml changes affect versioning and dependencies
+/Cargo.toml                        @noosehack/core-maintainers
+
+# =============================================================================
+# NOTES
+# =============================================================================
+#
+# To use this file:
+# 1. Replace @noosehack/core-maintainers with actual GitHub team
+#    (or individual usernames like @username1 @username2)
+# 2. Create the team in GitHub: Settings → Teams → New team
+# 3. Add team members with appropriate permissions
+#
+# Alternative (individual reviewers):
+# /.github/workflows/    @alice @bob @charlie
+#
+# This file only works if:
+# - Repository is owned by an organization (not personal account)
+# - CODEOWNERS feature is enabled in repo settings
+# - Branch protection requires review from code owners
