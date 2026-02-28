@@ -199,7 +199,7 @@ mod tests {
 
     #[test]
     fn test_dlog_wordwise_all_valid() {
-        let x = vec![100.0; 128];  // 2 full words
+        let x = vec![100.0; 128]; // 2 full words
         let x_valid = Bitmap::new_all_valid(128);
 
         let mut out = vec![0.0; 128];

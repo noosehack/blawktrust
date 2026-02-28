@@ -7,8 +7,8 @@
 //! - Uninit outputs
 //! - Word-wise bitmap
 
+use blawk_kdb::{dlog_scale_add_into, Column, Scratch};
 use std::time::Instant;
-use blawk_kdb::{Column, Scratch, dlog_scale_add_into};
 
 fn main() {
     println!("========================================");

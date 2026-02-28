@@ -12,11 +12,15 @@
 //! Fused (1 pass):
 //!   dlog_scale_add_into(out, x, lag, a, b)
 
+use blawk_kdb::{dlog_into, dlog_scale_add_into, Column, Scratch};
 use std::time::Instant;
-use blawk_kdb::{Column, Scratch, dlog_into, dlog_scale_add_into};
 
 fn scale_add_into(out: &mut Column, x: &Column, a: f64, b: f64, scratch: &mut Scratch) {
-    let Column::F64 { data: x_data, valid: x_valid } = x else {
+    let Column::F64 {
+        data: x_data,
+        valid: x_valid,
+    } = x
+    else {
         panic!("scale_add_into: expected F64 column");
     };
 

@@ -5,9 +5,9 @@
 //!
 //! Expected: Small speedup in masked operations due to fewer writes
 
-use std::time::Instant;
-use blawk_kdb::{Column, Bitmap, materialize_sentinel};
 use blawk_kdb::builtins::dlog_column;
+use blawk_kdb::{materialize_sentinel, Bitmap, Column};
+use std::time::Instant;
 
 fn main() {
     println!("=== STEP 1: Stop Writing Sentinel NA ===\n");
@@ -27,7 +27,10 @@ fn main() {
         valid: Some(bitmap),
     };
 
-    println!("Dataset: {} elements, 10% nulls, {} iterations\n", size, iters);
+    println!(
+        "Dataset: {} elements, 10% nulls, {} iterations\n",
+        size, iters
+    );
 
     // Warm up
     let _ = dlog_column(&col, 1);

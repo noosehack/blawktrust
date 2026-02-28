@@ -20,13 +20,7 @@ use crate::table::Bitmap;
 /// Computes: out[i] = a * (ln(x[i]) - ln(x[i-lag])) + b
 ///
 /// Single pass through memory, no intermediate allocations.
-pub fn dlog_scale_add_no_nulls(
-    out: &mut [f64],
-    x: &[f64],
-    lag: usize,
-    a: f64,
-    b: f64,
-) {
+pub fn dlog_scale_add_no_nulls(out: &mut [f64], x: &[f64], lag: usize, a: f64, b: f64) {
     let n = x.len();
     assert_eq!(out.len(), n);
 
@@ -113,12 +107,7 @@ pub fn dlog_scale_add_masked(
 // Use case: Log transform with scaling/offset
 
 /// ln_scale_add fast path: No nulls
-pub fn ln_scale_add_no_nulls(
-    out: &mut [f64],
-    x: &[f64],
-    a: f64,
-    b: f64,
-) {
+pub fn ln_scale_add_no_nulls(out: &mut [f64], x: &[f64], a: f64, b: f64) {
     assert_eq!(out.len(), x.len());
 
     unsafe {
@@ -167,13 +156,7 @@ pub fn ln_scale_add_masked(
 // Use case: Spread construction, normalized residuals, linear transforms
 
 /// sub_mul_add fast path: No nulls
-pub fn sub_mul_add_no_nulls(
-    out: &mut [f64],
-    x: &[f64],
-    y: &[f64],
-    a: f64,
-    b: f64,
-) {
+pub fn sub_mul_add_no_nulls(out: &mut [f64], x: &[f64], y: &[f64], a: f64, b: f64) {
     assert_eq!(out.len(), x.len());
     assert_eq!(out.len(), y.len());
 
@@ -237,7 +220,7 @@ mod tests {
         // Compute: 2.0 * dlog(x, 1) + 1.0
         dlog_scale_add_no_nulls(&mut out, &x, 1, 2.0, 1.0);
 
-        assert!(out[0].is_nan());  // Prefix
+        assert!(out[0].is_nan()); // Prefix
 
         // Expected: 2.0 * (ln(101) - ln(100)) + 1.0
         let expected = 2.0 * (101.0_f64.ln() - 100.0_f64.ln()) + 1.0;
@@ -248,17 +231,17 @@ mod tests {
     fn test_dlog_scale_add_masked() {
         let x = vec![100.0, 101.0, 102.0, 103.0];
         let mut x_valid = Bitmap::new_all_valid(4);
-        x_valid.set(2, false);  // Mark index 2 as null
+        x_valid.set(2, false); // Mark index 2 as null
 
         let mut out = vec![0.0; 4];
         let mut out_valid = Bitmap::new_all_null(4);
 
         dlog_scale_add_masked(&mut out, &mut out_valid, &x, &x_valid, 1, 2.0, 1.0);
 
-        assert!(!out_valid.get(0));  // Prefix invalid
-        assert!(out_valid.get(1));   // Valid
-        assert!(!out_valid.get(2));  // x[2] is null
-        assert!(!out_valid.get(3));  // Depends on x[2]
+        assert!(!out_valid.get(0)); // Prefix invalid
+        assert!(out_valid.get(1)); // Valid
+        assert!(!out_valid.get(2)); // x[2] is null
+        assert!(!out_valid.get(3)); // Depends on x[2]
     }
 
     #[test]
@@ -269,8 +252,8 @@ mod tests {
         // Compute: 2.0 * ln(x) + 1.0
         ln_scale_add_no_nulls(&mut out, &x, 2.0, 1.0);
 
-        assert!((out[0] - 1.0).abs() < 1e-10);  // 2*ln(1) + 1 = 1
-        assert!((out[1] - 3.0).abs() < 1e-10);  // 2*ln(e) + 1 = 3
+        assert!((out[0] - 1.0).abs() < 1e-10); // 2*ln(1) + 1 = 1
+        assert!((out[1] - 3.0).abs() < 1e-10); // 2*ln(e) + 1 = 3
         let expected = 2.0 * 10.0_f64.ln() + 1.0;
         assert!((out[2] - expected).abs() < 1e-10);
     }
@@ -284,9 +267,9 @@ mod tests {
         // Compute: (x - y) * 2.0 + 1.0
         sub_mul_add_no_nulls(&mut out, &x, &y, 2.0, 1.0);
 
-        assert_eq!(out[0], (10.0 - 1.0) * 2.0 + 1.0);  // 19.0
-        assert_eq!(out[1], (20.0 - 2.0) * 2.0 + 1.0);  // 37.0
-        assert_eq!(out[2], (30.0 - 3.0) * 2.0 + 1.0);  // 55.0
+        assert_eq!(out[0], (10.0 - 1.0) * 2.0 + 1.0); // 19.0
+        assert_eq!(out[1], (20.0 - 2.0) * 2.0 + 1.0); // 37.0
+        assert_eq!(out[2], (30.0 - 3.0) * 2.0 + 1.0); // 55.0
     }
 
     #[test]
@@ -296,15 +279,24 @@ mod tests {
 
         let mut x_valid = Bitmap::new_all_valid(3);
         let mut y_valid = Bitmap::new_all_valid(3);
-        y_valid.set(1, false);  // y[1] is null
+        y_valid.set(1, false); // y[1] is null
 
         let mut out = vec![0.0; 3];
         let mut out_valid = Bitmap::new_all_null(3);
 
-        sub_mul_add_masked(&mut out, &mut out_valid, &x, &x_valid, &y, &y_valid, 2.0, 1.0);
+        sub_mul_add_masked(
+            &mut out,
+            &mut out_valid,
+            &x,
+            &x_valid,
+            &y,
+            &y_valid,
+            2.0,
+            1.0,
+        );
 
-        assert!(out_valid.get(0));   // Both valid
-        assert!(!out_valid.get(1));  // y[1] null
-        assert!(out_valid.get(2));   // Both valid
+        assert!(out_valid.get(0)); // Both valid
+        assert!(!out_valid.get(1)); // y[1] null
+        assert!(out_valid.get(2)); // Both valid
     }
 }

@@ -87,7 +87,11 @@ impl Ori {
     #[inline]
     pub fn map_ij(self, nr: usize, nc: usize, i: usize, j: usize) -> (usize, usize) {
         match self {
-            Ori::D4 { swap, flip_i, flip_j } => {
+            Ori::D4 {
+                swap,
+                flip_i,
+                flip_j,
+            } => {
                 let (mut ii, mut jj) = if swap {
                     // Transpose: logical (i,j) → (j,i) before flips
                     (j, i)
@@ -125,7 +129,7 @@ impl Ori {
     #[inline]
     pub fn logical_shape(self, nr: usize, nc: usize) -> (usize, usize) {
         match self {
-            Ori::D4 { swap: true, .. } => (nc, nr), // Transposed
+            Ori::D4 { swap: true, .. } => (nc, nr),  // Transposed
             Ori::D4 { swap: false, .. } => (nr, nc), // Normal
             Ori::Each | Ori::Real => (nr, nc),
         }
@@ -158,7 +162,7 @@ impl Ori {
             Ori::Real => ReduceMode::Scalar,
             Ori::D4 { swap: false, .. } => ReduceMode::ByCols, // ColwiseLike
             Ori::D4 { swap: true, .. } => ReduceMode::ByRows,  // RowwiseLike
-            Ori::Each => ReduceMode::ByCols, // Default to colwise
+            Ori::Each => ReduceMode::ByCols,                   // Default to colwise
         }
     }
 
@@ -181,14 +185,46 @@ impl Ori {
         match self {
             Ori::Each => "X",
             Ori::Real => "R",
-            Ori::D4 { swap: false, flip_i: false, flip_j: false } => "H",
-            Ori::D4 { swap: false, flip_i: true, flip_j: false } => "N",
-            Ori::D4 { swap: false, flip_i: false, flip_j: true } => "_N",
-            Ori::D4 { swap: false, flip_i: true, flip_j: true } => "_H",
-            Ori::D4 { swap: true, flip_i: false, flip_j: false } => "Z",  // Canonical for S
-            Ori::D4 { swap: true, flip_i: true, flip_j: false } => "_Z",
-            Ori::D4 { swap: true, flip_i: false, flip_j: true } => "_S",
-            Ori::D4 { swap: true, flip_i: true, flip_j: true } => "??",  // Unused 8th D4 orientation
+            Ori::D4 {
+                swap: false,
+                flip_i: false,
+                flip_j: false,
+            } => "H",
+            Ori::D4 {
+                swap: false,
+                flip_i: true,
+                flip_j: false,
+            } => "N",
+            Ori::D4 {
+                swap: false,
+                flip_i: false,
+                flip_j: true,
+            } => "_N",
+            Ori::D4 {
+                swap: false,
+                flip_i: true,
+                flip_j: true,
+            } => "_H",
+            Ori::D4 {
+                swap: true,
+                flip_i: false,
+                flip_j: false,
+            } => "Z", // Canonical for S
+            Ori::D4 {
+                swap: true,
+                flip_i: true,
+                flip_j: false,
+            } => "_Z",
+            Ori::D4 {
+                swap: true,
+                flip_i: false,
+                flip_j: true,
+            } => "_S",
+            Ori::D4 {
+                swap: true,
+                flip_i: true,
+                flip_j: true,
+            } => "??", // Unused 8th D4 orientation
         }
     }
 }
@@ -464,8 +500,14 @@ mod tests {
         );
 
         // Verify 4 colwise + 4 rowwise + 2 special
-        let colwise = ORI_SPECS.iter().filter(|s| s.class == OriClass::ColwiseLike).count();
-        let rowwise = ORI_SPECS.iter().filter(|s| s.class == OriClass::RowwiseLike).count();
+        let colwise = ORI_SPECS
+            .iter()
+            .filter(|s| s.class == OriClass::ColwiseLike)
+            .count();
+        let rowwise = ORI_SPECS
+            .iter()
+            .filter(|s| s.class == OriClass::RowwiseLike)
+            .count();
         assert_eq!(colwise, 4);
         assert_eq!(rowwise, 4);
     }
@@ -526,7 +568,7 @@ mod tests {
 
         // Row-major orientations
         assert_eq!(ORI_Z.canonical_name(), "Z");
-        assert_eq!(ORI_S.canonical_name(), "Z");  // S is synonym for Z
+        assert_eq!(ORI_S.canonical_name(), "Z"); // S is synonym for Z
         assert_eq!(ORI__Z.canonical_name(), "_Z");
         assert_eq!(ORI__S.canonical_name(), "_S");
 

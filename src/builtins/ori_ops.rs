@@ -3,8 +3,8 @@
 //! Operations that dispatch based on TableView orientation.
 //! Demonstrates the O(1) orientation system in action.
 
-use crate::table::{Column, Table, TableView, OriClass};
 use crate::builtins::dlog_column;
+use crate::table::{Column, OriClass, Table, TableView};
 
 // Temporary stub for wmean0 (windowed mean)
 // TODO: Implement proper windowed mean function
@@ -48,7 +48,9 @@ pub fn sum(view: &TableView) -> Column {
         OriClass::ColwiseLike => sum_colwise(&view.table),
         OriClass::RowwiseLike => sum_rowwise_tiled(&view.table),
         OriClass::Real => sum_scalar(&view.table),
-        OriClass::Each => panic!("sum not defined for Each (X) orientation - use for broadcast context only"),
+        OriClass::Each => {
+            panic!("sum not defined for Each (X) orientation - use for broadcast context only")
+        }
     }
 }
 
@@ -104,7 +106,9 @@ fn sum_rowwise_tiled(table: &Table) -> Column {
     }
 
     // Extract F64 columns (skip temporal columns)
-    let f64_cols: Vec<&[f64]> = table.columns.iter()
+    let f64_cols: Vec<&[f64]> = table
+        .columns
+        .iter()
         .filter_map(|col| match col {
             Column::F64(data) => Some(data.as_slice()),
             _ => None,
@@ -239,7 +243,9 @@ fn dlog_rowwise(table: &Table) -> Table {
     }
 
     // Extract F64 columns (preserve temporal as-is)
-    let f64_indices: Vec<usize> = table.columns.iter()
+    let f64_indices: Vec<usize> = table
+        .columns
+        .iter()
         .enumerate()
         .filter_map(|(i, col)| match col {
             Column::F64(_) => Some(i),
@@ -374,7 +380,9 @@ fn w5_rowwise(table: &Table, window: usize) -> Table {
     }
 
     // Extract F64 columns (preserve temporal as-is)
-    let f64_indices: Vec<usize> = table.columns.iter()
+    let f64_indices: Vec<usize> = table
+        .columns
+        .iter()
         .enumerate()
         .filter_map(|(i, col)| match col {
             Column::F64(_) => Some(i),
@@ -458,7 +466,7 @@ fn compute_wmean_sequence(values: &[f64], window: usize) -> Vec<f64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::table::{ORI_H, ORI_Z, ORI_R, ORI_X};
+    use crate::table::{ORI_H, ORI_R, ORI_X, ORI_Z};
 
     fn make_test_table() -> Table {
         // 3x2 table:
@@ -469,7 +477,7 @@ mod tests {
             vec![
                 Column::F64(vec![1.0, 2.0, 3.0]),
                 Column::F64(vec![4.0, 5.0, 6.0]),
-            ]
+            ],
         )
     }
 
@@ -483,7 +491,7 @@ mod tests {
         match result {
             Column::F64(data) => {
                 assert_eq!(data.len(), 2);
-                assert_eq!(data[0], 6.0);  // 1 + 2 + 3
+                assert_eq!(data[0], 6.0); // 1 + 2 + 3
                 assert_eq!(data[1], 15.0); // 4 + 5 + 6
             }
             _ => panic!("Expected F64 column"),
@@ -563,7 +571,7 @@ mod tests {
             vec![
                 Column::F64(vec![1.0, f64::NAN, 3.0]),
                 Column::F64(vec![4.0, 5.0, f64::NAN]),
-            ]
+            ],
         );
 
         let view = TableView::with_ori(table, ORI_Z);
@@ -571,9 +579,9 @@ mod tests {
 
         match result {
             Column::F64(data) => {
-                assert_eq!(data[0], 5.0);  // 1 + 4
-                assert_eq!(data[1], 5.0);  // NaN + 5 = 5
-                assert_eq!(data[2], 3.0);  // 3 + NaN = 3
+                assert_eq!(data[0], 5.0); // 1 + 4
+                assert_eq!(data[1], 5.0); // NaN + 5 = 5
+                assert_eq!(data[2], 3.0); // 3 + NaN = 3
             }
             _ => panic!(),
         }
@@ -635,7 +643,7 @@ mod tests {
                 Column::Date(vec![18628, 18629, NULL_DATE]),
                 Column::F64(vec![1.0, 2.0, 3.0]),
                 Column::Timestamp(vec![0, 1_000_000_000, NULL_TIMESTAMP]),
-            ]
+            ],
         );
 
         // Colwise: date and timestamp columns should produce NaN
@@ -644,9 +652,9 @@ mod tests {
         match result {
             Column::F64(data) => {
                 assert_eq!(data.len(), 3);
-                assert!(data[0].is_nan());  // date → NaN
-                assert_eq!(data[1], 6.0);   // value → 6.0
-                assert!(data[2].is_nan());  // timestamp → NaN
+                assert!(data[0].is_nan()); // date → NaN
+                assert_eq!(data[1], 6.0); // value → 6.0
+                assert!(data[2].is_nan()); // timestamp → NaN
             }
             _ => panic!(),
         }
@@ -672,10 +680,7 @@ mod tests {
 
         let table = Table::new(
             vec!["a".to_string(), "b".to_string()],
-            vec![
-                Column::F64(data_a.clone()),
-                Column::F64(data_b.clone()),
-            ]
+            vec![Column::F64(data_a.clone()), Column::F64(data_b.clone())],
         );
 
         let view = TableView::with_ori(table, ORI_Z);
@@ -705,7 +710,7 @@ mod tests {
             vec![
                 Column::F64(vec![100.0, 110.0, 121.0]),
                 Column::F64(vec![50.0, 55.0, 50.0]),
-            ]
+            ],
         );
 
         let view = TableView::with_ori(table, ORI_H);
@@ -746,7 +751,7 @@ mod tests {
                 Column::F64(vec![100.0, 50.0, 200.0]),
                 Column::F64(vec![110.0, 55.0, 210.0]),
                 Column::F64(vec![121.0, 50.0, 220.0]),
-            ]
+            ],
         );
 
         let view = TableView::with_ori(table, ORI_Z);
@@ -757,7 +762,9 @@ mod tests {
 
         // Physical storage unchanged, but dlog applied across rows
         // row[0]: [NaN, ln(110/100), ln(121/110)]
-        if let (Column::F64(a), Column::F64(b), Column::F64(c)) = (&result.columns[0], &result.columns[1], &result.columns[2]) {
+        if let (Column::F64(a), Column::F64(b), Column::F64(c)) =
+            (&result.columns[0], &result.columns[1], &result.columns[2])
+        {
             assert!(a[0].is_nan());
             assert!((b[0] - (110.0f64 / 100.0f64).ln()).abs() < 1e-10);
             assert!((c[0] - (121.0f64 / 110.0f64).ln()).abs() < 1e-10);
@@ -821,7 +828,7 @@ mod tests {
             vec![
                 Column::Date(vec![18628, 18629, NULL_DATE]),
                 Column::F64(vec![100.0, 110.0, 121.0]),
-            ]
+            ],
         );
 
         // Colwise
@@ -885,8 +892,12 @@ mod tests {
         // row[2]: [1, 2, 3, 4, 5, 6, 7]
         let table = Table::new(
             vec![
-                "c0".to_string(), "c1".to_string(), "c2".to_string(),
-                "c3".to_string(), "c4".to_string(), "c5".to_string(),
+                "c0".to_string(),
+                "c1".to_string(),
+                "c2".to_string(),
+                "c3".to_string(),
+                "c4".to_string(),
+                "c5".to_string(),
                 "c6".to_string(),
             ],
             vec![
@@ -963,7 +974,14 @@ mod tests {
         // Window with all NaN should produce NaN
         let table = Table::new(
             vec!["a".to_string()],
-            vec![Column::F64(vec![f64::NAN, f64::NAN, f64::NAN, f64::NAN, f64::NAN, 100.0])],
+            vec![Column::F64(vec![
+                f64::NAN,
+                f64::NAN,
+                f64::NAN,
+                f64::NAN,
+                f64::NAN,
+                100.0,
+            ])],
         );
 
         let view = TableView::with_ori(table, ORI_H);

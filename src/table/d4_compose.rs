@@ -10,7 +10,11 @@ use super::orientation::{Ori, ORI_SPECS};
 /// Encoding: id = (swap<<2) | (flip_i<<1) | flip_j
 pub fn d4_to_id(ori: Ori) -> Option<u8> {
     match ori {
-        Ori::D4 { swap, flip_i, flip_j } => {
+        Ori::D4 {
+            swap,
+            flip_i,
+            flip_j,
+        } => {
             let id = (if swap { 4 } else { 0 })
                 | (if flip_i { 2 } else { 0 })
                 | (if flip_j { 1 } else { 0 });
@@ -46,14 +50,14 @@ pub fn id_to_d4(id: u8) -> Ori {
 /// - id=7: swap + flip_i + flip_j
 pub const D4_COMP: [[u8; 8]; 8] = [
     // Generated using D4 group multiplication
-    [0, 1, 2, 3, 4, 5, 6, 7],  // id=0 (identity)
-    [1, 0, 3, 2, 5, 4, 7, 6],  // id=1 (flip_j)
-    [2, 3, 0, 1, 6, 7, 4, 5],  // id=2 (flip_i)
-    [3, 2, 1, 0, 7, 6, 5, 4],  // id=3 (flip_i+flip_j)
-    [4, 6, 5, 7, 0, 2, 1, 3],  // id=4 (swap)
-    [5, 7, 4, 6, 1, 3, 0, 2],  // id=5 (swap+flip_j)
-    [6, 4, 7, 5, 2, 0, 3, 1],  // id=6 (swap+flip_i)
-    [7, 5, 6, 4, 3, 1, 2, 0],  // id=7 (swap+flip_i+flip_j)
+    [0, 1, 2, 3, 4, 5, 6, 7], // id=0 (identity)
+    [1, 0, 3, 2, 5, 4, 7, 6], // id=1 (flip_j)
+    [2, 3, 0, 1, 6, 7, 4, 5], // id=2 (flip_i)
+    [3, 2, 1, 0, 7, 6, 5, 4], // id=3 (flip_i+flip_j)
+    [4, 6, 5, 7, 0, 2, 1, 3], // id=4 (swap)
+    [5, 7, 4, 6, 1, 3, 0, 2], // id=5 (swap+flip_j)
+    [6, 4, 7, 5, 2, 0, 3, 1], // id=6 (swap+flip_i)
+    [7, 5, 6, 4, 3, 1, 2, 0], // id=7 (swap+flip_i+flip_j)
 ];
 
 /// Compose two D4 orientations: result = b ∘ a
@@ -152,8 +156,7 @@ mod tests {
         for a in 0..8 {
             for b in 0..8 {
                 assert_eq!(
-                    D4_COMP[a][b],
-                    generated[a][b],
+                    D4_COMP[a][b], generated[a][b],
                     "D4_COMP[{}][{}] mismatch: expected {}, got {}",
                     a, b, generated[a][b], D4_COMP[a][b]
                 );
@@ -206,7 +209,7 @@ mod tests {
 
     #[test]
     fn test_compose_rejects_non_d4() {
-        use crate::table::orientation::{ORI_X, ORI_R};
+        use crate::table::orientation::{ORI_R, ORI_X};
 
         // X and R are not D4
         assert!(compose(ORI_H, ORI_X).is_none());
@@ -230,7 +233,11 @@ mod tests {
         for spec in &ORI_SPECS {
             if let Ori::D4 { .. } = spec.ori {
                 let id = d4_to_id(spec.ori);
-                assert!(id.is_some(), "Failed to encode D4 orientation {}", spec.name);
+                assert!(
+                    id.is_some(),
+                    "Failed to encode D4 orientation {}",
+                    spec.name
+                );
             }
         }
     }
@@ -253,9 +260,11 @@ mod tests {
                     let bc = compose(ori_b, ori_c).unwrap();
                     let a_bc = compose(ori_a, bc).unwrap();
 
-                    assert_eq!(ab_c, a_bc,
+                    assert_eq!(
+                        ab_c, a_bc,
                         "Associativity failed: ({} ∘ {}) ∘ {} ≠ {} ∘ ({} ∘ {})",
-                        id_a, id_b, id_c, id_a, id_b, id_c);
+                        id_a, id_b, id_c, id_a, id_b, id_c
+                    );
                 }
             }
         }
@@ -273,8 +282,11 @@ mod tests {
                 if D4_COMP[id_a as usize][id_b as usize] == h_id {
                     found_inverse = true;
                     // Verify it's a two-sided inverse
-                    assert_eq!(D4_COMP[id_b as usize][id_a as usize], h_id,
-                        "{} is left-inverse of {} but not right-inverse", id_b, id_a);
+                    assert_eq!(
+                        D4_COMP[id_b as usize][id_a as usize], h_id,
+                        "{} is left-inverse of {} but not right-inverse",
+                        id_b, id_a
+                    );
                     break;
                 }
             }

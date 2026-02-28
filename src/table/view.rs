@@ -33,10 +33,7 @@ impl TableView {
 
     /// Create a view from an Arc<Table> with default orientation
     pub fn from_arc(table: Arc<Table>) -> Self {
-        TableView {
-            table,
-            ori: ORI_H,
-        }
+        TableView { table, ori: ORI_H }
     }
 
     /// Create a view with explicit orientation
@@ -153,15 +150,22 @@ mod tests {
 
     fn make_test_table() -> Table {
         // 3x4 table with values a[i][j] = 10*i + j
-        let names = vec!["col0".to_string(), "col1".to_string(), "col2".to_string(), "col3".to_string()];
+        let names = vec![
+            "col0".to_string(),
+            "col1".to_string(),
+            "col2".to_string(),
+            "col3".to_string(),
+        ];
 
-        let columns = (0..4).map(|j| {
-            Column::F64(vec![
-                (10 * 0 + j) as f64,
-                (10 * 1 + j) as f64,
-                (10 * 2 + j) as f64,
-            ])
-        }).collect();
+        let columns = (0..4)
+            .map(|j| {
+                Column::F64(vec![
+                    (10 * 0 + j) as f64,
+                    (10 * 1 + j) as f64,
+                    (10 * 2 + j) as f64,
+                ])
+            })
+            .collect();
 
         Table::new(names, columns)
     }
@@ -207,7 +211,7 @@ mod tests {
         assert_eq!(view.get_f64(1, 2), 12.0);
 
         // Corner cases
-        assert_eq!(view.get_f64(0, 0), 0.0);  // 10*0 + 0
+        assert_eq!(view.get_f64(0, 0), 0.0); // 10*0 + 0
         assert_eq!(view.get_f64(2, 3), 23.0); // 10*2 + 3
     }
 
@@ -293,12 +297,12 @@ mod tests {
         // Absolute: always replaces
         let view_abs1 = view.with_orientation(ORI_Z);
         let view_abs2 = view_abs1.with_orientation(ORI_Z);
-        assert_eq!(view_abs2.ori, ORI_Z);  // Still Z, not H
+        assert_eq!(view_abs2.ori, ORI_Z); // Still Z, not H
 
         // Relative: composes
         let view_rel1 = view.compose_orientation(ORI_Z).unwrap();
         let view_rel2 = view_rel1.compose_orientation(ORI_Z).unwrap();
-        assert_eq!(view_rel2.ori, ORI_H);  // Z ∘ Z = H (back to identity)
+        assert_eq!(view_rel2.ori, ORI_H); // Z ∘ Z = H (back to identity)
     }
 
     #[test]

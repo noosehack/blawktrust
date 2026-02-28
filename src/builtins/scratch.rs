@@ -65,7 +65,7 @@ impl Scratch {
             // Reuse existing buffer WITHOUT zeroing
             if buf.capacity() >= len {
                 unsafe {
-                    buf.set_len(len);  // Skip clear() and resize() - no zeroing!
+                    buf.set_len(len); // Skip clear() and resize() - no zeroing!
                 }
                 return buf;
             }
@@ -146,7 +146,7 @@ mod tests {
         // Second allocation reuses (no new allocation)
         let buf2 = scratch.get_f64(100);
         assert_eq!(buf2.len(), 100);
-        assert_eq!(scratch.stats().f64_bufs, 0);  // Buffer taken from pool
+        assert_eq!(scratch.stats().f64_bufs, 0); // Buffer taken from pool
     }
 
     #[test]

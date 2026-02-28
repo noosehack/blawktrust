@@ -5,11 +5,11 @@
 //! Before (Step 1): Each op allocates new Vec<f64>
 //! After (Step 2):  Reuse buffers from scratch pool (~0 alloc after warmup)
 
-use std::time::Instant;
+use blawk_kdb::builtins::dlog_column;
+use blawk_kdb::{abs_into, dlog_into, ln_into, Column, Scratch};
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use blawk_kdb::{Column, Scratch, dlog_into, ln_into, abs_into};
-use blawk_kdb::builtins::dlog_column;
+use std::time::Instant;
 
 // Allocation tracker
 struct TrackingAllocator;
@@ -114,7 +114,10 @@ fn main() {
     let alloc_per_iter_new = allocated_new / iters;
 
     println!("Time:       {:.2} ms/iter", per_iter_new);
-    println!("Allocated:  {} KB/iter (after warmup)", alloc_per_iter_new / 1024);
+    println!(
+        "Allocated:  {} KB/iter (after warmup)",
+        alloc_per_iter_new / 1024
+    );
     println!("Total:      {} KB total", allocated_new / 1024);
 
     println!("\n{}", "=".repeat(60));
@@ -176,18 +179,25 @@ fn main() {
     let alloc_per_iter_pipeline = allocated_pipeline / iters;
 
     println!("Time:       {:.2} ms/iter (3 ops)", per_iter_pipeline);
-    println!("Allocated:  {} KB/iter (after warmup)", alloc_per_iter_pipeline / 1024);
+    println!(
+        "Allocated:  {} KB/iter (after warmup)",
+        alloc_per_iter_pipeline / 1024
+    );
     println!("Total:      {} KB total", allocated_pipeline / 1024);
 
     println!("\n{}", "=".repeat(60));
     println!("RESULTS SUMMARY");
     println!("{}", "=".repeat(60));
 
-    println!("Single-op allocation savings: {:.1}× less memory",
-             alloc_per_iter_old as f64 / alloc_per_iter_new.max(1) as f64);
+    println!(
+        "Single-op allocation savings: {:.1}× less memory",
+        alloc_per_iter_old as f64 / alloc_per_iter_new.max(1) as f64
+    );
 
-    println!("Pipeline allocation (after warmup): ~{} KB/iter (near zero!)",
-             alloc_per_iter_pipeline / 1024);
+    println!(
+        "Pipeline allocation (after warmup): ~{} KB/iter (near zero!)",
+        alloc_per_iter_pipeline / 1024
+    );
 
     println!("\n✅ STEP 2 COMPLETE:");
     println!("   - Scratch allocator implemented");

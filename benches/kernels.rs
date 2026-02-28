@@ -14,7 +14,9 @@ use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criteri
 fn log_kernel_tight(x: &[f64]) -> Vec<f64> {
     let n = x.len();
     let mut out = Vec::<f64>::with_capacity(n);
-    unsafe { out.set_len(n); }
+    unsafe {
+        out.set_len(n);
+    }
 
     for i in 0..n {
         unsafe {
@@ -28,11 +30,15 @@ fn log_kernel_tight(x: &[f64]) -> Vec<f64> {
 fn shift_kernel_tight(x: &[f64], lag: usize) -> Vec<f64> {
     let n = x.len();
     let mut out = Vec::<f64>::with_capacity(n);
-    unsafe { out.set_len(n); }
+    unsafe {
+        out.set_len(n);
+    }
 
     // First lag elements are NaN
     for i in 0..lag.min(n) {
-        unsafe { *out.get_unchecked_mut(i) = f64::NAN; }
+        unsafe {
+            *out.get_unchecked_mut(i) = f64::NAN;
+        }
     }
 
     // Copy shifted values
@@ -50,7 +56,9 @@ fn sub_kernel_tight(a: &[f64], b: &[f64]) -> Vec<f64> {
     debug_assert_eq!(n, b.len());
 
     let mut out = Vec::<f64>::with_capacity(n);
-    unsafe { out.set_len(n); }
+    unsafe {
+        out.set_len(n);
+    }
 
     for i in 0..n {
         unsafe {
@@ -64,11 +72,15 @@ fn sub_kernel_tight(a: &[f64], b: &[f64]) -> Vec<f64> {
 fn dlog_fused_kernel_tight(x: &[f64], lag: usize) -> Vec<f64> {
     let n = x.len();
     let mut out = Vec::<f64>::with_capacity(n);
-    unsafe { out.set_len(n); }
+    unsafe {
+        out.set_len(n);
+    }
 
     // First lag elements are NaN (no prior value)
     for i in 0..lag.min(n) {
-        unsafe { *out.get_unchecked_mut(i) = f64::NAN; }
+        unsafe {
+            *out.get_unchecked_mut(i) = f64::NAN;
+        }
     }
 
     // Fused log returns: ln(x[i]) - ln(x[i-lag]) in one pass

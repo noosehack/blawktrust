@@ -17,28 +17,28 @@ impl Bitmap {
     pub fn new_all_valid(len: usize) -> Self {
         let words = (len + 63) / 64;
         let mut bits = vec![!0u64; words];
-        
+
         // Mask off unused bits in last word
         let rem = len % 64;
         if rem != 0 {
             bits[words - 1] = (1u64 << rem) - 1;
         }
-        
+
         Self { bits, len }
     }
 
     /// Create bitmap with all bits set to 0 (all null)
     pub fn new_all_null(len: usize) -> Self {
         let words = (len + 63) / 64;
-        Self { 
-            bits: vec![0u64; words], 
-            len 
+        Self {
+            bits: vec![0u64; words],
+            len,
         }
     }
 
     #[inline]
-    pub fn len(&self) -> usize { 
-        self.len 
+    pub fn len(&self) -> usize {
+        self.len
     }
 
     #[inline]
@@ -50,8 +50,8 @@ impl Bitmap {
     #[inline]
     pub fn get(&self, i: usize) -> bool {
         debug_assert!(i < self.len);
-        let w = i >> 6;  // word index (i / 64)
-        let b = i & 63;  // bit index (i % 64)
+        let w = i >> 6; // word index (i / 64)
+        let b = i & 63; // bit index (i % 64)
         (self.bits[w] >> b) & 1 == 1
     }
 
@@ -62,10 +62,10 @@ impl Bitmap {
         let w = i >> 6;
         let b = i & 63;
         let mask = 1u64 << b;
-        if v { 
-            self.bits[w] |= mask; 
-        } else { 
-            self.bits[w] &= !mask; 
+        if v {
+            self.bits[w] |= mask;
+        } else {
+            self.bits[w] &= !mask;
         }
     }
 
@@ -148,10 +148,10 @@ mod tests {
         let mut b = Bitmap::new_all_valid(128);
         a.set(10, false);
         b.set(20, false);
-        
+
         let mut out = Bitmap::new_all_valid(128);
         Bitmap::and_into(&a, &b, &mut out);
-        
+
         assert!(!out.get(10), "a was null");
         assert!(!out.get(20), "b was null");
         assert!(out.get(30), "both valid");

@@ -14,7 +14,7 @@ use crate::table::Bitmap;
 pub fn dlog_no_nulls(out: &mut [f64], x: &[f64], lag: usize) {
     let n = x.len();
     assert_eq!(out.len(), n);
-    
+
     if lag == 0 || lag >= n {
         out.fill(f64::NAN);
         return;
@@ -22,11 +22,11 @@ pub fn dlog_no_nulls(out: &mut [f64], x: &[f64], lag: usize) {
 
     // Prefix is invalid (no prior data)
     out[..lag].fill(f64::NAN);
-    
+
     unsafe {
         let xp = x.as_ptr();
         let op = out.as_mut_ptr();
-        
+
         // 🔥 CLEAN LOOP: No branches!
         for i in lag..n {
             let curr = *xp.add(i);
@@ -102,13 +102,7 @@ where
 }
 
 /// Generic unary operation (masked)
-pub fn unary_masked<F>(
-    out: &mut [f64],
-    out_valid: &mut Bitmap,
-    x: &[f64],
-    x_valid: &Bitmap,
-    f: F,
-)
+pub fn unary_masked<F>(out: &mut [f64], out_valid: &mut Bitmap, x: &[f64], x_valid: &Bitmap, f: F)
 where
     F: Fn(f64) -> f64,
 {
@@ -139,7 +133,7 @@ where
 {
     assert_eq!(out.len(), a.len());
     assert_eq!(out.len(), b.len());
-    
+
     for i in 0..a.len() {
         out[i] = f(a[i], b[i]);
     }
@@ -154,8 +148,7 @@ pub fn binary_masked<F>(
     b: &[f64],
     b_valid: &Bitmap,
     f: F,
-)
-where
+) where
     F: Fn(f64, f64) -> f64,
 {
     let n = a.len();
@@ -187,10 +180,10 @@ mod tests {
     fn test_dlog_no_nulls() {
         let x = vec![100.0, 101.0, 102.0, 103.0];
         let mut out = vec![0.0; 4];
-        
+
         dlog_no_nulls(&mut out, &x, 1);
-        
-        assert!(out[0].is_nan());  // Prefix
+
+        assert!(out[0].is_nan()); // Prefix
         assert!((out[1] - (101.0_f64.ln() - 100.0_f64.ln())).abs() < 1e-10);
         assert!((out[2] - (102.0_f64.ln() - 101.0_f64.ln())).abs() < 1e-10);
     }
@@ -199,17 +192,17 @@ mod tests {
     fn test_dlog_masked() {
         let x = vec![100.0, 101.0, 102.0, 103.0];
         let mut x_valid = Bitmap::new_all_valid(4);
-        x_valid.set(2, false);  // Mark index 2 as null
-        
+        x_valid.set(2, false); // Mark index 2 as null
+
         let mut out = vec![0.0; 4];
         let mut out_valid = Bitmap::new_all_null(4);
-        
+
         dlog_masked(&mut out, &mut out_valid, &x, &x_valid, 1);
-        
-        assert!(!out_valid.get(0));  // Prefix invalid
-        assert!(out_valid.get(1));   // Valid
-        assert!(!out_valid.get(2));  // x[2] is null
-        assert!(!out_valid.get(3));  // x[3-1]=x[2] is null
+
+        assert!(!out_valid.get(0)); // Prefix invalid
+        assert!(out_valid.get(1)); // Valid
+        assert!(!out_valid.get(2)); // x[2] is null
+        assert!(!out_valid.get(3)); // x[3-1]=x[2] is null
     }
 
     #[test]
@@ -217,12 +210,12 @@ mod tests {
         let x = vec![1.0, 2.0, 3.0, 4.0];
         let mut x_valid = Bitmap::new_all_valid(4);
         x_valid.set(1, false);
-        
+
         let mut out = vec![0.0; 4];
         let mut out_valid = Bitmap::new_all_null(4);
-        
+
         unary_masked(&mut out, &mut out_valid, &x, &x_valid, |x| x * 2.0);
-        
+
         assert!(out_valid.get(0));
         assert!(!out_valid.get(1));
         assert!(out_valid.get(2));
@@ -234,22 +227,30 @@ mod tests {
     fn test_binary_masked() {
         let a = vec![1.0, 2.0, 3.0, 4.0];
         let b = vec![10.0, 20.0, 30.0, 40.0];
-        
+
         let mut a_valid = Bitmap::new_all_valid(4);
         let mut b_valid = Bitmap::new_all_valid(4);
         a_valid.set(1, false);
         b_valid.set(2, false);
-        
+
         let mut out = vec![0.0; 4];
         let mut out_valid = Bitmap::new_all_null(4);
-        
-        binary_masked(&mut out, &mut out_valid, &a, &a_valid, &b, &b_valid, |x, y| x + y);
-        
-        assert!(out_valid.get(0));   // Both valid
-        assert!(!out_valid.get(1));  // a[1] null
-        assert!(!out_valid.get(2));  // b[2] null
-        assert!(out_valid.get(3));   // Both valid
-        
+
+        binary_masked(
+            &mut out,
+            &mut out_valid,
+            &a,
+            &a_valid,
+            &b,
+            &b_valid,
+            |x, y| x + y,
+        );
+
+        assert!(out_valid.get(0)); // Both valid
+        assert!(!out_valid.get(1)); // a[1] null
+        assert!(!out_valid.get(2)); // b[2] null
+        assert!(out_valid.get(3)); // Both valid
+
         assert_eq!(out[0], 11.0);
         assert_eq!(out[3], 44.0);
     }

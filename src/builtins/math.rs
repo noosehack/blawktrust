@@ -55,7 +55,9 @@ impl Column {
 fn log_kernel_old(x: &[f64]) -> Vec<f64> {
     let n = x.len();
     let mut out = Vec::<f64>::with_capacity(n);
-    unsafe { out.set_len(n); }
+    unsafe {
+        out.set_len(n);
+    }
 
     for i in 0..n {
         unsafe {
@@ -71,11 +73,15 @@ fn log_kernel_old(x: &[f64]) -> Vec<f64> {
 fn shift_kernel_old(x: &[f64], lag: usize) -> Vec<f64> {
     let n = x.len();
     let mut out = Vec::<f64>::with_capacity(n);
-    unsafe { out.set_len(n); }
+    unsafe {
+        out.set_len(n);
+    }
 
     // First lag elements are NA
     for i in 0..lag.min(n) {
-        unsafe { *out.get_unchecked_mut(i) = NA; }
+        unsafe {
+            *out.get_unchecked_mut(i) = NA;
+        }
     }
 
     // Copy shifted values
@@ -94,7 +100,9 @@ fn sub_kernel_old(a: &[f64], b: &[f64]) -> Vec<f64> {
     debug_assert_eq!(n, b.len());
 
     let mut out = Vec::<f64>::with_capacity(n);
-    unsafe { out.set_len(n); }
+    unsafe {
+        out.set_len(n);
+    }
 
     for i in 0..n {
         unsafe {
@@ -114,11 +122,15 @@ fn sub_kernel_old(a: &[f64], b: &[f64]) -> Vec<f64> {
 fn dlog_fused_kernel_old(x: &[f64], lag: usize) -> Vec<f64> {
     let n = x.len();
     let mut out = Vec::<f64>::with_capacity(n);
-    unsafe { out.set_len(n); }
+    unsafe {
+        out.set_len(n);
+    }
 
     // First lag elements are NA (no prior value)
     for i in 0..lag.min(n) {
-        unsafe { *out.get_unchecked_mut(i) = NA; }
+        unsafe {
+            *out.get_unchecked_mut(i) = NA;
+        }
     }
 
     // Fused: ln(curr) - ln(prev) in one pass
@@ -140,7 +152,7 @@ fn dlog_fused_kernel_old(x: &[f64], lag: usize) -> Vec<f64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_fused_matches_non_fused() {
         let data = vec![100.0, 102.0, 101.0, 103.0, 105.0];

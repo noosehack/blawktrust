@@ -3,8 +3,8 @@
 //! All operations work directly on data vectors.
 //! NaN propagation handled by IEEE 754 automatically.
 
-use crate::table::Column;
 use crate::builtins::kernels_masked::{dlog_no_nulls, unary_no_nulls};
+use crate::table::Column;
 
 /// dlog: Log returns (kdb-style)
 ///
@@ -59,7 +59,7 @@ pub fn sum(x: &Column) -> f64 {
 
     let mut result = 0.0;
     for &val in data {
-        result += val;  // NaN propagates automatically
+        result += val; // NaN propagates automatically
     }
     result
 }

@@ -14,11 +14,11 @@ impl Table {
         assert_eq!(names.len(), columns.len());
         Self { names, columns }
     }
-    
+
     pub fn row_count(&self) -> usize {
         self.columns.first().map(|c| c.len()).unwrap_or(0)
     }
-    
+
     pub fn col_count(&self) -> usize {
         self.columns.len()
     }

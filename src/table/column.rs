@@ -53,7 +53,6 @@ pub enum Column {
     /// Missing values represented as NULL_TS (i64::MIN).
     /// Pure kdb-style: null is a value, no bitmap overhead.
     Ts(Vec<i64>),
-
     // TODO: I64, Sym, Bool
 }
 
